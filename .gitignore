@@ -1,0 +1,12 @@
+.vs
+.vscode
+*.class
+
+# Folders
+ref/
+*.idea/
+*obsolete/
+*nhaps/
+
+# Files
+*nhaps.txt
