@@ -24,7 +24,7 @@ CREATE TABLE `agency` (
   `TELEPHONE` VARCHAR(20) NOT NULL, -- domain: non-empty string
   `SIEGE` VARCHAR(255) NOT NULL, -- domain: non-empty string
   PRIMARY KEY (`ID`),
-  UNIQUE KEY `NAME` (`NAME`), -- integrity constraint: unique name
+  UNIQUE KEY `NAME` (`NAME`) -- integrity constraint: unique name
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
