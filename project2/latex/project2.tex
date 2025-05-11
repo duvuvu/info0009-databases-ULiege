@@ -1,0 +1,1000 @@
+\documentclass[a4paper, 12pt]{article}
+
+\def\languages{french, english}
+
+%%%%%%%%%%%%%%%%%%% Libraries
+
+\input{include/libraries/bibliography.tex}
+\input{./include/libraries/default.tex}
+\input{./include/libraries/figures.tex}
+\input{./include/libraries/mathematics.tex}
+\input{./include/libraries/units.tex}
+
+%%%%%%%%%%%%%%%%%%% Bibliography
+
+\addbibresource{resources/bib/ref.bib}
+
+%%%%%%%%%%%%%%%%%%% Titlepage
+
+\def\logopath{./resources/pdf/logo.pdf}
+\def\toptitle{University of Liège}
+\title{Project part 2}
+\def\subtitle{\textsc{INFO0009} - Bases des données (Databases)}
+%\def\authorhead{}
+\author{
+Yusuf \textsc{Agirbas} (s225049)\\
+Ibrahim \textsc{Touhami} (s220915) \\
+Duy Vu \textsc{Dinh} (s2401627)\\
+}
+%\def\rightauthorhead{}
+%\def\rightauthor{}
+% \def\context{MSc in Data science and engineering}
+\date{Academic year 2024-2025}
+%%%%%%%%%%%%%%%%%%%
+
+\usepackage{mhchem}
+\usepackage{wrapfig}
+\usepackage{xcolor}
+
+\usepackage{pdflscape}
+\usepackage{booktabs}
+
+
+\usepackage{listings}
+
+% \definecolor{codegray}{gray}{0.95}
+% \lstset{
+%   % backgroundcolor=\color{codegray},
+%   basicstyle=\ttfamily\footnotesize,
+%   breaklines=true,
+%   % frame=single
+% }
+
+% \definecolor{dkgreen}{rgb}{0,0.6,0} 
+% \definecolor{gray}{rgb}{0.5,0.5,0.5}
+% \definecolor{mauve}{rgb}{0.58,0,0.82}
+% \lstset{language=SQL,
+%   basicstyle={\footnotesize\ttfamily},
+%   belowskip=3mm,
+%   breakatwhitespace=true,
+%   breaklines=true,
+%   classoffset=0,
+%   columns=flexible,
+%   commentstyle=\color{dkgreen},
+%   framexleftmargin=0.25em,
+%   % frameshape={}{yy}{}{}, %To remove to vertical lines on left, set `frameshape={}{}{}{}`
+%   keywordstyle=\color{blue},
+%   numbers=none, %If you want line numbers, set `numbers=left`
+%   numberstyle=\tiny\color{gray},
+%   showstringspaces=false,
+%   stringstyle=\color{mauve},
+%   tabsize=3,
+%   xleftmargin =1em
+% }
+
+\definecolor{dkgreen}{rgb}{0,0.6,0} 
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{language=SQL,
+  basicstyle={\footnotesize\ttfamily},
+  belowskip=3mm,
+  breakatwhitespace=true,
+  breaklines=true,
+  classoffset=0,
+  columns=flexible,
+  commentstyle=\color{dkgreen},
+  frame=single, % Adds a framebox around the code
+  framexleftmargin=0.25em,
+  keywordstyle=\color{blue},
+  numbers=left, % Adds line numbers on the left
+  numberstyle=\tiny\color{gray},
+  showstringspaces=false,
+  stringstyle=\color{mauve},
+  tabsize=3,
+  xleftmargin =1em
+}
+
+%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\input{./include/titlepages/default.tex}
+
+\newpage
+
+% ==================================================================================================================
+% SECTION:
+% ==================================================================================================================
+\section*{Overview}
+
+This project focuses on building a relational database system to manage public transportation data such as agencies, stops, services, routes, and schedules. The system is implemented using MySQL and PHP, with a frontend for data manipulation and querying. Docker is used for deployment, and PhpMyAdmin provides database access. The project includes tasks for data loading, selection, insertion, deletion, updates, and view creation, with an emphasis on data integrity, transaction management, and collaborative development.
+
+
+% ==================================================================================================================
+% SECTION:
+% ==================================================================================================================
+\section{Website architecture description} \label{sec:1}
+
+The website is a PHP application deployed within a Docker-based LAMP stack consisting of:
+\begin{itemize}
+    \item Apache 2 and PHP 7.2 (customized with PDO and zip extensions)
+    \item MySQL 8.0 as the backend database
+    \item PhpMyAdmin for manual SQL access and verification
+\end{itemize}
+
+The project follows a modular structure:
+\begin{itemize}
+    \item \texttt{docker-compose.yml} and \texttt{Dockerfile}: Define the container services, including the database, PHP, and Apache.
+    \item \texttt{dump/}:
+    \begin{itemize}
+        \item \texttt{myDb.sql}: Creates all tables and loads data from CSV files
+        \item \texttt{views.sql}: Contains SQL view definitions for tasks (tasks 4, 5, and 6) involving derived attributes and recursive queries
+        \item \texttt{*.CSV}: Raw data files that are imported at container startup
+    \end{itemize}
+    \item \texttt{www/}: Contains all the PHP and HTML files used to interact with the database via the web interface:
+    \begin{itemize}
+        \item \texttt{index.html}: Homepage with links to all tasks
+        \item \texttt{header.php} / \texttt{footer.php}: Common layout includes
+        \item \texttt{t2\_selection\_agency.php}: Task 2 - Select agencies
+        \item \texttt{t2\_selection\_schedule.php}: Task 2 - Select schedules
+        \item \texttt{t2\_selection\_exception.php}: Task 2 - Select exceptions
+        \item \texttt{t3\_insert\_service.php}: Task 3 - Insert a new service and exceptions
+        \item \texttt{t4\_recursive\_services\_by\_date.php}: Task 4 - Create view of services available by date
+        \item \texttt{t5\_aggregate\_avg\_stop\_time.php}: Task 5 - Create view of average stop time
+        \item \texttt{t6\_pattern\_search\_stops.php}: Task 6 - Create view and select stop with statistic information
+        \item \texttt{t7\_delete\_insert\_itinerary.php}: Task 7 - Delete itinerary and insert new route
+        \item \texttt{t8\_update\_stop\_table.php}: Task 8 - Update stop information
+    \end{itemize}
+\end{itemize}
+
+The \texttt{index.html} page serves as the homepage and provides links to each task's corresponding PHP page. The PHP pages communicate with the MySQL database using \texttt{PDO} with prepared statements for secure and reliable operations.
+
+% ==================================================================================================================
+% SECTION:
+% ==================================================================================================================
+% \newpage
+\section{Database initialization} \label{sec:2}
+
+To initialize the database, follow these main steps:
+
+\begin{enumerate}
+    \item Install Docker and Docker Compose.
+    \item Navigate to the root directory of the project.
+    \item Launch the containers using:
+    \begin{lstlisting}
+    docker-compose up -d
+    \end{lstlisting}
+    
+    \item During container initialization, MySQL automatically executes all scripts in the \texttt{dump/} directory by using the volume mapping in \texttt{docker-compose.yml}:
+    \begin{itemize}
+        \item \texttt{myDb.sql} creates all tables, defines constraints, and loads data from CSV files using \texttt{LOAD DATA INFILE}.
+        \item \texttt{views.sql} creates the views required for tasks involving recursive queries and derived aggregations.
+    \end{itemize}
+    
+    \item You can access:
+    \begin{itemize}
+        \item PhpMyAdmin at \url{http://localhost:8080}
+        \item The web application at \url{http://localhost}
+    \end{itemize}
+\end{enumerate}
+
+As configured in \texttt{docker-compose.yml}, the default database credentials are:
+\begin{itemize}
+    \item \textbf{Database name}: \texttt{group21}
+    \item \textbf{Username}: \texttt{group21}
+    \item \textbf{Password}: \texttt{secret}
+    \item \textbf{MySQL Hostname}: \texttt{ms8db}
+\end{itemize}
+
+
+% ==================================================================================================================
+% SECTION:
+% ==================================================================================================================
+\newpage
+\section{Query/transaction explanations} \label{sec:3}
+
+
+% % --------------------------------------------------------------------
+% % 
+% % --------------------------------------------------------------------
+% \subsection*{Databases overview}
+
+% \begin{itemize}
+%     \item \texttt{agency(\underline{ID}, NAME, URL, TIME\_ZONE, TELEPHONE, SIEGE)}  
+%     \item \texttt{main\_language(\underline{AGENCY\_ID}, \underline{LANGUAGE})}
+%     \item \texttt{itinerary(\underline{ID}, AGENCY\_ID, TYPE, NAME)}
+%     \item \texttt{stop(\underline{ID}, NAME, LATITUDE, LONGITUDE)}
+%     \item \texttt{stop\_serviced(\underline{ITINERAIRE\_ID}, \underline{STOP\_ID}, SEQUENCE)}
+%     \item \texttt{service(\underline{ID}, NAME, MONDAY, ..., SUNDAY, START\_DATE, END\_DATE)}
+%     \item \texttt{exception({\underline{SERVICE\_ID}, \underline{DATE}, CODE)}
+%     \item \texttt{route(\underline{ROUTE\_ID}, SERVICE\_ID, ITINERAIRE\_ID, DIRECTION)}
+%     \item \texttt{schedule(\underline{ROUTE\_ID}, \underline{ITINERAIRE\_ID}, \underline{STOP\_ID}, ARRIVAL\_TIME, DEPARTURE\_TIME)}
+% \end{itemize}
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+% \newpage
+\subsection{Task 2: Selection queries}
+
+This task implements SQL \texttt{SELECT} statements with optional filters on string and numeric attributes. It allows users to filter tuples in the \texttt{agency}, \texttt{schedule}, and \texttt{exception} tables using \texttt{LIKE BINARY} for case-sensitive partial matches and \texttt{=} for exact matches. Multiple filters are combined using logical \texttt{AND}.
+
+\textbf{Query logic:} The SQL query generated follows a general structure:
+
+\begin{lstlisting}[language=SQL]
+SELECT * 
+FROM <target_table>
+WHERE 1=1
+  [AND condition1]
+  [AND condition2]
+  ...
+\end{lstlisting}
+
+
+
+\begin{itemize}
+    \item The \texttt{SELECT *} clause retrieves all columns from the specified table.
+    \item The \texttt{FROM} clause refers to the table being queried (e.g., \texttt{agency}).
+    \item The query always begins with the dummy clause \texttt{WHERE 1=1}, which simplifies dynamic construction by allowing all selects to be appended using \texttt{AND}.
+    \item String fields are selected using \texttt{LIKE BIRNAY} with \texttt{\%} wildcards for case-sensitive partial matching.
+    \item Numeric and date fields are selected using the equality operator (\texttt{=}).
+    \item Filters are applied only if the corresponding form field is non-empty. Field order in the SQL query follows the input form..
+    \item Prepared statements using \texttt{PDO} are used to bind all parameters securely and prevent SQL injection.
+\end{itemize}
+
+
+\subsubsection{Agency}
+
+\textbf{File:} \texttt{t2\_selection\_agency.php}.
+
+\textbf{Form:} Table \ref{tab:p3-t2-agency-form-fields} summarizes the form fields.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for agency selection.}
+    \label{tab:p3-t2-agency-form-fields}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} & \textbf{SQL match type} \\
+        \midrule
+        \texttt{id}         & number        & ID of the agency                            & \texttt{=} (exact match) \\
+        \texttt{name}       & text          & Name of the agency                          & \texttt{LIKE BINARY} (partial match) \\
+        \texttt{telephone}  & text          & Telephone number                            & \texttt{LIKE BINARY} (partial match) \\
+        \texttt{siege}      & text          & Headquarters address                        & \texttt{LIKE BINARY} (partial match) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\newpage
+
+\textbf{Sample query:}
+\begin{lstlisting}[language=SQL]
+SELECT * FROM agency
+WHERE 1=1
+  AND ID = 1
+  AND NAME LIKE BINARY '%SNC%'
+  AND TELEPHONE LIKE BINARY '%+3%'
+  AND SIEGE LIKE BINARY '%France%';
+\end{lstlisting}
+
+\subsubsection{Schedule}
+
+\textbf{File:} \texttt{t2\_selection\_schedule.php}.
+
+\textbf{Form:} Table \ref{tab:p3-t2-schedule-form-fields} summarizes the form fields.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for schedule selection.}
+    \label{tab:p3-t2-schedule-form-fields}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} & \textbf{SQL match type} \\
+        \midrule
+        \texttt{route\_id}     & text          & ID of the route         & \texttt{LIKE BINARY} (partial match) \\
+        \texttt{itinerary\_id} & number        & ID of the itinerary     & \texttt{=} (exact match) \\
+        \texttt{stop\_id}      & number        & ID of the stop          & \texttt{=} (exact match) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Sample query:}
+
+\begin{lstlisting}[language=SQL]
+SELECT * FROM schedule
+WHERE 1=1
+  AND ROUTE_ID LIKE BINARY '%:1043:20250314'
+  AND ITINERAIRE_ID = 658
+  AND STOP_ID = 8841004;
+\end{lstlisting}
+
+
+\subsubsection{Service exception}
+
+\textbf{File:} \texttt{t2\_selection\_exception.php}.
+
+\textbf{Form:} Table \ref{tab:p3-t2-exception-form-fields} summarizes the form fields.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for service exception selection.}
+    \label{tab:p3-t2-exception-form-fields}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} & \textbf{SQL match type} \\
+        \midrule
+        \texttt{service\_id} & number & ID of the service                                           & \texttt{=} (exact match) \\
+        \texttt{date}        & date   & Exception date                                              & \texttt{=} (exact match) \\
+        \texttt{code}        & number & Exception code: \texttt{1} = INCLUDED, \texttt{2} = EXCLUDED & \texttt{=} (exact match) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Sample query:}
+
+\begin{lstlisting}[language=SQL]
+SELECT * FROM exception
+WHERE 1=1
+  AND SERVICE_ID = 3
+  AND DATE = '2025-12-25'
+  AND CODE = 1;
+\end{lstlisting}
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+\newpage
+\subsection{Task 3: Insertion queries}
+
+This task involves inserting new tuples into the \texttt{service} and \texttt{exception} tables. A transaction is used to ensure both inserts succeed together. User input from checkboxes (for weekdays) and a text area (for exceptions) is converted into \texttt{INSERT INTO} statements. Exception types are normalized using codes (e.g., \texttt{INCLUDED} = 1, \texttt{EXCLUDED} = 2).
+
+\subsubsection{Service and its Exceptions}
+
+\textbf{File:} \texttt{t3\_insert\_service.php}
+
+\textbf{Table definition:} \texttt{myDB.sql}
+
+The ID column in the \texttt{service} table is defined as \texttt{AUTO\_INCREMENT}, meaning MySQL automatically generates a unique identifier for each new service:
+
+    \begin{lstlisting}[language=SQL]
+CREATE TABLE service (
+  ID INT NOT NULL AUTO_INCREMENT,
+  ...
+  PRIMARY KEY (ID)
+);
+    \end{lstlisting}
+
+
+ The ID column in the service table is defined as \texttt{AUTO\_INCREMENT}
+
+\textbf{Form:} Table \ref{tab:p3-t3-add-service} summarizes the form fields:
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for service and exception insertion.}
+    \label{tab:p3-t3-add-service}
+    \begin{tabular}{llp{10cm}}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} \\
+        \midrule
+        \texttt{name}                             & text      & name of the new service \\
+        \texttt{start\_date}, \texttt{end\_date}  & date      & the period during which the service operates \\
+        \texttt{monday},..., \texttt{sunday}      & checkbox  & operation days of the new service (checked = operates, unchecked = does not operate) \\
+        \texttt{exceptions}                        & textarea  & a multiline text area where each line represents an exception in the format: \texttt{YYYY-MM-DD INCLUDED} or \texttt{YYYY-MM-DD EXCLUDED} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Query Logic:}
+\begin{enumerate}
+    \item On submission, the script first validates each line in the exception field to ensure it follows the expected format and code value.
+    \item A transaction is started using \texttt{\$bdd->beginTransaction()}.
+    \item The service is inserted into the \texttt{service} table, for example:
+    \begin{lstlisting}[language=SQL]
+INSERT INTO service (NAME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY,
+                     FRIDAY, SATURDAY, SUNDAY, START_DATE, END_DATE)
+VALUES ('SERVICE A', 1, 1, 1, 1, 1, 1, 1, '2025-01-01', '2025-06-30');
+    \end{lstlisting}
+    \item The generated \texttt{SERVICE\_ID} is retrieved using \texttt{\$bdd->lastInsertId()}.
+    \item For each exception line, a corresponding tuple is inserted into the \texttt{exception} table:
+    \begin{lstlisting}[language=SQL]
+INSERT INTO exception (SERVICE_ID, DATE, CODE)
+VALUES (12, '2025-04-21', 2);
+    \end{lstlisting}
+    where \texttt{CODE} is 1 for \texttt{INCLUDED} and 2 for \texttt{EXCLUDED}.
+    \item If all operations succeed, the transaction is committed using \texttt{\$bdd->commit()}. If any step fails, the transaction is rolled back by \texttt{\$bdd->rollBack()} and an error is shown to the user.
+\end{enumerate}
+
+\begin{itemize}
+    \item All SQL statements are parameterized using \texttt{PDO::prepare()} and \texttt{execute()} to ensure security and prevent SQL injection.
+    \item The logic ensures atomicity: either all inserts succeed, or none are committed in the event of validation or SQL errors.
+\end{itemize}
+
+
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+\subsection{Task 4: Recursive view queries}
+
+This task uses a recursive Common Table Expression (CTE) to generate all service dates between \texttt{START\_DATE} and \texttt{END\_DATE} based on weekday flags. A second view combines this result with the \texttt{exception} table to include or exclude specific dates. Final output is grouped by date using \texttt{GROUP\_CONCAT}.
+
+\subsubsection{Services available by date}
+
+File: \texttt{t4\_recursive\_services\_by\_date.php}
+
+\textbf{View definition:} \texttt{views.sql}
+
+\begin{enumerate}
+    \item \texttt{vw\_service\_dates\_raw}: Generate valid service dates 
+
+    \begin{lstlisting}[language=SQL]
+CREATE OR REPLACE VIEW vw_service_dates_raw AS
+WITH RECURSIVE all_dates AS (
+  SELECT 
+    ID AS SERVICE_ID,
+    NAME,
+    START_DATE AS `DATE`,
+    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY,
+    END_DATE
+  FROM service
+  UNION ALL
+  SELECT
+    SERVICE_ID,
+    NAME,
+    DATE_ADD(`DATE`, INTERVAL 1 DAY),
+    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY,
+    END_DATE
+  FROM all_dates
+  WHERE `DATE` < END_DATE
+)
+SELECT SERVICE_ID, NAME, `DATE`
+FROM all_dates
+WHERE (
+  (DAYOFWEEK(`DATE`) = 1 AND SUNDAY = 1) OR
+  (DAYOFWEEK(`DATE`) = 2 AND MONDAY = 1) OR
+  (DAYOFWEEK(`DATE`) = 3 AND TUESDAY = 1) OR
+  (DAYOFWEEK(`DATE`) = 4 AND WEDNESDAY = 1) OR
+  (DAYOFWEEK(`DATE`) = 5 AND THURSDAY = 1) OR
+  (DAYOFWEEK(`DATE`) = 6 AND FRIDAY = 1) OR
+  (DAYOFWEEK(`DATE`) = 7 AND SATURDAY = 1)
+);
+    \end{lstlisting}
+    \begin{itemize}
+        \item This view uses a recursive CTE to expand the service date range from \texttt{START\_DATE} to \texttt{END\_DATE}.
+        \item Dates are retained only if the corresponding weekday is active, using the \texttt{DAYOFWEEK} function.
+    \end{itemize}
+    \item \texttt{vw\_service\_dates\_selected}: Apply exceptions and aggregate services
+    \begin{lstlisting}[language=SQL]
+CREATE OR REPLACE VIEW vw_service_dates_filtered AS
+SELECT DATE, GROUP_CONCAT(DISTINCT NAME ORDER BY NAME SEPARATOR ', ') AS SERVICES
+FROM (
+  -- Regular services from raw, not overridden by EXCLUSIONS
+  SELECT r.SERVICE_ID, r.DATE, r.NAME
+  FROM vw_service_dates_raw r
+  LEFT JOIN exception e
+    ON r.SERVICE_ID = e.SERVICE_ID AND r.DATE = e.DATE AND e.CODE = 2
+  WHERE e.SERVICE_ID IS NULL
+
+  UNION
+
+  -- INCLUDED exceptions, even if not normally active
+  SELECT s.ID AS SERVICE_ID, e.DATE, s.NAME
+  FROM exception e
+  JOIN service s ON s.ID = e.SERVICE_ID
+  WHERE e.CODE = 1
+) all_valid
+GROUP BY DATE
+ORDER BY DATE;
+    \end{lstlisting}
+
+    \begin{itemize}
+        \item This view adjusts the output by applying service exceptions:
+        \begin{itemize}
+            \item Dates with \texttt{CODE = 2} (EXCLUDED) are removed using a \texttt{LEFT JOIN} and \texttt{WHERE IS NULL}.
+            \item Dates with \texttt{CODE = 1} (INCLUDED) are added via \texttt{UNION}.
+        \end{itemize}
+        \item Services are aggregated per date using \texttt{GROUP\_CONCAT}, sorted alphabetically.
+    \end{itemize}
+\end{enumerate}
+
+
+\textbf{Query logic:} The SQL query generated follows a general structure:
+    \begin{lstlisting}[language=SQL]
+SELECT * FROM vw_service_dates_selected;
+    \end{lstlisting}
+The output is presented in a table showing one row per date and a comma-separated list of available services.
+
+
+
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+\newpage
+\subsection{Task 5: Aggregation queries}
+This task computes the average stop duration per route and itinerary using SQL aggregation functions. It uses \texttt{AVG()} along with \texttt{GROUP BY ... WITH ROLLUP} to produce both per-route and per-itinerary summaries, including a global average across all data.
+
+\subsubsection{Average stop time}
+
+\textbf{File:} \texttt{t5\_aggregate\_avg\_stop\_time.php}
+
+\textbf{View definitions:}
+\begin{enumerate}
+    \item \texttt{vw\_stop\_times}: Computes the stop duration in seconds for each schedule entry using \texttt{TIMEDIFF} between \texttt{ARRIVAL\_TIME} and \texttt{DEPARTURE\_TIME}.
+    \begin{lstlisting}[language=SQL]
+CREATE OR REPLACE VIEW vw_stop_times AS
+SELECT 
+    i.ID AS itinerary_id,
+    i.NAME AS itinerary_name,
+    t.ROUTE_ID,
+    TIME_TO_SEC(TIMEDIFF(s.DEPARTURE_TIME, s.ARRIVAL_TIME)) AS stop_time
+FROM 
+    schedule s
+JOIN 
+    itinerary i ON s.ITINERAIRE_ID = i.ID
+JOIN 
+    route t ON s.ROUTE_ID = t.ROUTE_ID AND s.ITINERAIRE_ID = t.ITINERAIRE_ID
+WHERE 
+    s.DEPARTURE_TIME IS NOT NULL 
+    AND s.ARRIVAL_TIME IS NOT NULL;
+    \end{lstlisting}
+
+    \begin{itemize}
+        \item Derived attributes with \texttt{TIMEDIFF()} and \texttt{TIME\_TO\_SEC()}
+    \end{itemize}
+
+
+    \item \texttt{vw\_stop\_time\_averages}: Groups the computed stop durations by itinerary and route, and uses the \texttt{WITH ROLLUP} modifier to include subtotal and grand total rows.
+    \begin{lstlisting}[language=SQL]
+CREATE OR REPLACE VIEW vw_stop_time_averages AS
+SELECT 
+    itinerary_name AS ITINERARY,
+    ROUTE_ID AS ROUTE,
+    AVG(stop_time) AS AVG_STOP_TIME
+FROM 
+    vw_stop_times
+GROUP BY 
+    itinerary_name, ROUTE_ID WITH ROLLUP;
+    \end{lstlisting}
+
+    \begin{itemize}
+        \item Aggregation using \texttt{AVG()}
+        \item Hierarchical summarization via \texttt{GROUP BY ... WITH ROLLUP}
+        \item Semantic interpretation of NULL values in grouping for subtotal and grand total logic
+    \end{itemize}
+
+\end{enumerate}
+
+\textbf{Query logic:} The SQL query generated follows a general structure:
+
+\begin{lstlisting}[language=SQL]
+SELECT * FROM vw_stop_time_averages
+\end{lstlisting}
+
+The PHP script interprets the output as follows:
+
+\begin{itemize}
+    \item Rows with both \texttt{ITINERARY} and \texttt{ROUTE} non-null represent average stop times for specific trips.
+    \item Rows with a null \texttt{ROUTE} but a non-null \texttt{ITINERARY} represent the average stop time for all trips under that itinerary.
+    \item Rows where both \texttt{ITINERARY} and \texttt{ROUTE} are null represent the global average stop time across all trips in the system.
+\end{itemize}
+
+These distinctions allow for structured display in the application, with subtotal and total rows styled differently for readability.
+
+\textbf{Example output logic:}
+
+\begin{table}[ht]
+    \centering
+    \footnotesize
+    \caption{Example output showing average stop times per route, itinerary, and globally.}
+    \label{tab:p3-task5-avg-stop-time}
+    \begin{tabular}{lll}
+    \toprule
+    \textbf{ITINERARY} & \textbf{ROUTE} & \textbf{AVG\_STOP\_TIME} \\
+    \midrule
+    Bruxelles-Midi -- Liège-Guillemins & 88\_\_\_\_:007::8844628:8891702:40:1117:20250411 & 1m 33s (93 seconds) \\
+    ... & ... & ... \\
+    Bruxelles-Midi -- Liège-Guillemins & Average & 1m 34s (94 seconds) \\
+    \hline
+    Eupen -- Ostende & 88\_\_\_\_:007::8844628:8891702:40:1117:20250411 & 3m 33s (213 seconds) \\
+    ... & ... & ... \\
+    Eupen -- Ostende & Average & 2m 57s (177 seconds) \\
+    \hline
+    ... & ... & ... \\
+    \hline
+    All Itineraries & Global Average & 2m 44s (164 seconds) \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+
+
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+% \newpage
+\subsection{Task 6: Pattern matching queries}
+
+This task allows case-insensitive search of station names using the \texttt{LOWER()} function and \texttt{LIKE}. It also counts the number of arrivals, departures, and stops at each station per service, using \texttt{COUNT()} or \texttt{SUM()} with grouping. Results are ordered by total activity in descending order and filtered by a minimum threshold if provided. 
+
+\subsubsection{Station search with stop statistics}
+
+\textbf{File:} \texttt{t6\_pattern\_search\_stops.php}
+
+\textbf{Form:} Table \ref{tab:p3-t6-search-form} summarizes the form fields.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for station search and stop statistics.}
+    \label{tab:p3-t6-search-form}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} & \textbf{SQL match type} \\
+        \midrule
+        \texttt{search\_string} & text   & Partial name of the station (required) & \texttt{LIKE} + \texttt{LOWER} \\
+        \texttt{min\_count}     & number & Optional minimum for stop, arrival, or departure counts & \texttt{>=} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\textbf{View definition:} The view \texttt{vw\_station\_service\_stats} aggregates the number of times each station is used as a stop, arrival, or departure location, grouped by station and service.
+
+\begin{lstlisting}[language=SQL]
+CREATE OR REPLACE VIEW vw_station_service_stats AS
+SELECT 
+    st.ID AS station_id,
+    st.NAME AS station_name,
+    sv.NAME AS service_name,
+    COUNT(s.STOP_ID) AS total_stops,
+    SUM(s.ARRIVAL_TIME IS NOT NULL) AS arrival_count,
+    SUM(s.DEPARTURE_TIME IS NOT NULL) AS departure_count
+FROM schedule s
+JOIN stop st ON st.ID = s.STOP_ID
+JOIN route r ON r.ROUTE_ID = s.ROUTE_ID
+JOIN service sv ON sv.ID = r.SERVICE_ID
+GROUP BY st.ID, sv.ID;
+\end{lstlisting}
+
+\begin{itemize}
+    \item Each row of the view represents a combination of station and service.
+    \item The \texttt{COUNT} function counts all scheduled stops.
+    \item \texttt{SUM(... IS NOT NULL)} treats \texttt{TRUE} as 1 and \texttt{FALSE} as 0 to count only non-null values.
+    \item This view is essential for computing service usage per station and for selecting results on the frontend.
+\end{itemize}
+
+
+\textbf{Query logic:} The backend dynamically builds a SQL query based on user input. The main data source is the view \texttt{vw\_station\_service\_stats}, which aggregates service activity per station.
+
+\begin{lstlisting}[language=SQL]
+SELECT * 
+FROM vw_station_service_stats
+WHERE LOWER(station_name) LIKE LOWER(:search_string)
+  [AND (total_stops >= :min OR arrival_count >= :min OR departure_count >= :min)]
+ORDER BY total_stops DESC, arrival_count DESC, departure_count DESC;
+\end{lstlisting}
+
+\begin{itemize}
+    \item The user-provided string is matched using the SQL \texttt{LIKE} operator with case normalization via \texttt{LOWER()}.
+    \item If a valid minimum number is provided, it selects records to include only those with at least that many stops, arrivals, or departures.
+    \item The final result is ordered in descending order of service activity: first by total stops, then by arrival and departure counts.
+    \item All SQL statements are parameterized using \texttt{PDO::prepare()} and \texttt{execute()} to ensure security and prevent SQL injection.
+\end{itemize}
+
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+\newpage
+\subsection{Task 7: Deletion and insertion queries}
+
+This task first allows deletion of an itinerary, which cascades to delete related routes, schedules, and stop-serviced entries via \texttt{ON DELETE CASCADE}. It also enables insertion of a new route and schedule. Inputs are validated to ensure arrival/departure logic, and the operation is performed inside a transaction to preserve consistency.
+
+
+\subsubsection{Itinerary deletion}
+
+File: \texttt{t7\_delete\_insert\_itinerary.php}
+
+This sub-task provides a form to select and delete an existing itinerary. When submitted, the itinerary and all dependent data (routes, schedules, and stop servicing links) are automatically deleted using cascade constraints.
+
+\textbf{Form:} Table \ref{tab:p3-t7-delete-form-fields} summarizes the form fields:
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for deleting an itinerary.}
+    \label{tab:p3-t7-delete-form-fields}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} \\
+        \midrule
+        \texttt{delete\_itinerary\_id} & select (dropdown) & ID of the itinerary to delete (required) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+To populate the dropdown, the following query is used:
+
+\begin{lstlisting}[language=SQL]
+SELECT ID, NAME FROM itinerary ORDER BY NAME;
+\end{lstlisting}
+
+
+\textbf{Query logic:}
+\begin{enumerate}
+    \item On form submission, the selected itinerary ID is passed as a parameter.
+    \item A transaction is started using \texttt{\$bdd->beginTransaction()}.
+    \item The itinerary is deleted using a prepared SQL query:
+    \begin{lstlisting}[language=SQL]
+DELETE FROM itinerary WHERE ID = ?;
+    \end{lstlisting}
+    For example, if ID \texttt{221} is selected:
+    \begin{lstlisting}[language=SQL]
+DELETE FROM itinerary WHERE ID = 221;
+    \end{lstlisting}
+
+    \item Thanks to the \texttt{ON DELETE CASCADE} constraints in the schema, this deletion automatically propagates to:
+    \begin{itemize}
+        \item all routes referencing this itinerary (\texttt{route.ITINERAIRE\_ID}),
+        \item all schedules referencing those routes (\texttt{schedule.ROUTE\_ID}),
+        \item all stop-servicing links (\texttt{stop\_serviced.ITINERAIRE\_ID}).
+    \end{itemize}
+
+    \item If all operations succeed, the transaction is committed using \texttt{\$bdd->commit()}. If any step fails, the transaction is rolled back by \texttt{\$bdd->rollBack()} and an error is shown to the user.
+\end{enumerate}
+
+\begin{itemize}
+    \item The deletion is encapsulated in a transaction to ensure atomicity. If any constraint fails or an exception is thrown, no data is removed.
+    \item All SQL operations are implemented using \texttt{PDO} with prepared statements to prevent SQL injection and ensure safe database interaction.
+\end{itemize}
+
+
+
+\subsubsection{Route insertion}
+
+This sub-task consists of two sequential forms: the first selects the itinerary and direction, and the second collects the stop-level schedule.
+
+File: \texttt{t7\_delete\_insert\_itinerary.php}
+
+\textbf{Form 1 - Select itinerary and direction:}
+
+The user first selects an itinerary and a direction to define the route. This triggers a second form with stop entries. Table \ref{tab:p3-t7-select-itinerary} summarizes the form fields:
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for selecting itinerary and direction.}
+    \label{tab:p3-t7-select-itinerary}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Form field} & \textbf{Type} & \textbf{Description} \\
+        \midrule
+        \texttt{add\_itinerary\_id} & select (dropdown) & The itinerary to which the new route will be added  (required) \\
+        \texttt{direction}          & select (dropdown) & Travel direction: \texttt{0} = forward, \texttt{1} = return  (required) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+To populate the dropdown of available itineraries, the following query is used:
+
+\begin{lstlisting}[language=SQL]
+SELECT ID, NAME FROM itinerary ORDER BY NAME;
+\end{lstlisting}
+
+\textbf{Query logic - Form 1:}
+\begin{enumerate}
+    \item Upon selecting an itinerary and a direction, the application fetches the list of stops for the selected itinerary using:
+    \begin{lstlisting}[language=SQL]
+SELECT ss.SEQUENCE, s.ID AS STOP_ID, s.NAME
+FROM stop_serviced ss
+JOIN stop s ON ss.STOP_ID = s.ID
+WHERE ss.ITINERAIRE_ID = ?
+ORDER BY ss.SEQUENCE ASC|DESC;
+    \end{lstlisting}
+    The direction determines the ordering:
+    \begin{itemize}
+        \item If direction = 0 (forward), stops are ordered \texttt{ASC} (from first to last).
+        \item If direction = 1 (return), stops are ordered \texttt{DESC} (from last to first).
+    \end{itemize}
+    \item The result is rendered as a table of serviced stops, where users can input arrival and departure times.
+\end{enumerate}
+
+\textbf{Form 2 - Enter stop schedule:}
+
+Once an itinerary and direction are selected, a second form appears to collect arrival and departure times.  Table \ref{tab:p3-t7-stop-timing-form} summarizes the form fields:
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for entering stop schedule.}
+    \label{tab:p3-t7-stop-timing-form}
+    \begin{tabular}{llp{10cm}}
+        \toprule
+        \textbf{Field name} & \textbf{Type} & \textbf{Description} \\
+        \midrule
+        \texttt{stop\_id[]} & hidden inputs & List of stop IDs (based on the itinerary and direction) \\
+        \texttt{arrival\_time[]} & time[] & Arrival time at each stop. \textbf{The first value is hidden and treated as \texttt{NULL}} \\
+        \texttt{departure\_time[]} & time[] & Departure time at each stop. \textbf{The last value is hidden and treated as \texttt{NULL}} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The sequence of stops is derived from the order of the array:
+\begin{itemize}
+    \item For forward direction (\texttt{0}), stops are ordered from first to last.
+    \item For return direction (\texttt{1}), stops are ordered in reverse.
+\end{itemize}
+
+\textbf{Query logic - Form 2:}
+\begin{enumerate}
+    \item Upon submitting the stop schedule form, several validation rules are applied in PHP before any database interaction:
+    \begin{itemize}
+        \item The first stop must not have an arrival time.
+        \item The last stop must not have a departure time.
+        \item Each intermediate stop must have both arrival and departure times.
+        \item For intermediate stops, \texttt{DEPARTURE\_TIME} must be greater than or equal to \texttt{ARRIVAL\_TIME}.
+        \item For consecutive stops, arrival at stop $i+1$ must be strictly greater than departure at stop $i$.
+    \end{itemize}
+    If any of these rules are violated, the route is not inserted, and the user is shown a detailed error list.
+
+    \item If all validations pass, a transaction is started using \texttt{\$bdd->beginTransaction()}.
+
+    \item A new route is inserted into the \texttt{route} table using a generated \texttt{ROUTE\_ID}:
+    \begin{lstlisting}[language=SQL]
+INSERT INTO route (ROUTE_ID, SERVICE_ID, ITINERAIRE_ID, DIRECTION)
+VALUES (?, 1, ?, ?);
+    \end{lstlisting}
+    The \texttt{ROUTE\_ID} follows this format:
+    \begin{lstlisting}
+"88____:007::<start>:<end>:<block>:<HHMM>:<YYYYMMDD>"
+    \end{lstlisting}
+    where: \texttt{start} and \texttt{end} are the first and last stop IDs, \texttt{block} is a fixed code (e.g., 40), \texttt{HHMM} is the first departure time formatted as hour and minute, \texttt{YYYYMMDD} is the current date.
+
+    \item Each stop is inserted into the \texttt{schedule} table with its respective times:
+    \begin{lstlisting}[language=SQL]
+INSERT INTO schedule (ROUTE_ID, ITINERAIRE_ID, STOP_ID, ARRIVAL_TIME, DEPARTURE_TIME)
+VALUES (?, ?, ?, ?, ?);
+    \end{lstlisting}
+
+    \item If all operations succeed, the transaction is committed using \texttt{\$bdd->commit()}. If any step fails, the transaction is rolled back by \texttt{\$bdd->rollBack()} and an error is shown to the user.
+\end{enumerate}
+
+\begin{itemize}
+    \item The operation is encapsulated in a transaction to ensure atomicity. 
+    \item All queries are implemented using \texttt{PDO} prepared statements, ensuring strong protection against SQL injection.
+\end{itemize}
+
+
+% --------------------------------------------------------------------
+% 
+% --------------------------------------------------------------------
+\subsection{Task 8: Update queries}
+
+This task lets users update stop information, including its primary key (\texttt{ID}). If the ID changes, the update propagates automatically to referencing tables (\texttt{schedule}, \texttt{stop\_serviced}) via \texttt{ON UPDATE CASCADE}. Coordinates are validated to ensure they fall within Belgium’s bounding box.
+
+
+\subsubsection{Edit stop information}
+
+File: \texttt{t8\_update\_stop\_table.php}
+
+\textbf{Form 1 - select:}  
+Users can narrow down the list of stops to edit using a simple selecting interface. Only stops with names \textbf{not containing parentheses} are shown.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Form fields for selecting stop entries.}
+    \label{tab:p3-t8-select-form}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Field} & \textbf{Type} & \textbf{Description} \\
+        \midrule
+        \texttt{id} & number & selects stops by exact ID \\
+        \texttt{name} & text & selects by partial match on name \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The corresponding SQL query is dynamically assembled:
+\begin{lstlisting}[language=SQL]
+SELECT * FROM stop
+WHERE NAME NOT LIKE '%(%)%'
+  [AND ID = ?]
+  [AND NAME LIKE BINARY ?];
+\end{lstlisting}
+
+\textbf{Form 2 - Editable table:}  
+Stops matching the select are displayed in a table. Each row includes an “Edit” button. Once clicked, that row becomes editable, allowing the user to modify the stop’s:
+
+\begin{itemize}
+    \item \texttt{ID}
+    \item \texttt{Name}
+    \item \texttt{Latitude}
+    \item \texttt{Longitude}
+\end{itemize}
+
+\textbf{Query logic:}
+\begin{enumerate}
+    \item Upon form submission, the application first applies validation rules:
+    \begin{itemize}
+        \item Latitude and longitude must be numeric.
+        \item Latitude must lie within the bounding box: $[49.5295, 51.4750]$.
+        \item Longitude must lie within the bounding box: $[2.5136, 6.1567]$.
+        \item If the stop ID is modified, the new ID must not already exist.
+    \end{itemize}
+
+    \item If all validations pass, a transaction is started using \texttt{\$bdd->beginTransaction()}.
+
+    \item If the stop ID is being updated, the script checks for collisions:
+    \begin{lstlisting}[language=SQL]
+SELECT COUNT(*) FROM stop WHERE ID = ?;
+    \end{lstlisting}
+    If the result is non-zero, the operation is aborted and rolled back.
+
+    \item The stop is then updated using:
+    \begin{lstlisting}[language=SQL]
+UPDATE stop
+SET ID = ?, NAME = ?, LATITUDE = ?, LONGITUDE = ?
+WHERE ID = ?;
+    \end{lstlisting}
+    \item Thanks to \texttt{ON UPDATE CASCADE} constraints defined in the schema, if the stop ID is modified, related foreign key references in \texttt{schedule} and \texttt{stop\_serviced} are automatically updated, ensuring referential integrity without extra queries. This ensures that the update remains consistent across all related tables without requiring additional manual update logic.
+
+    \item If all operations succeed, the transaction is committed using \texttt{\$bdd->commit()}. If any step fails, the transaction is rolled back by \texttt{\$bdd->rollBack()} and an error is shown to the user.
+\end{enumerate}
+
+\begin{itemize}
+    \item All SQL operations are implemented using \texttt{PDO} with prepared statements to prevent SQL injection and ensure safe database interaction.
+    \item Input is escaped and sanitized using \texttt{htmlspecialchars()}.
+\end{itemize}
+
+
+
+
+
+
+% ==================================================================================================================
+% SECTION:
+% ==================================================================================================================
+\newpage
+\section{Group contributions} \label{sec:4}
+
+\subsection{Implementation}
+
+\begin{itemize}
+    \item All members contributed collaboratively to Task 1 (database schema and initialization) since it is the most important task for all subsequent tasks.
+    \item Task 2 was divided evenly: each team member handled one of the three targeted tables (agency, schedule, exception).
+    \item Yusuf implemented Task 3 (service and exception insertion).
+    \item Ibrahim was responsible for Task 5 (aggregation of stop times) and Task 6 (station search with statistics).
+    \item Vu implemented Task 4 (recursive views and service availability), Task 7 (itinerary deletion and route insertion), and Task 8 (editing stop information).
+    \item After initial implementation, all members peer-reviewed each other’s tasks and made improvements based on group feedback.
+\end{itemize}
+
+\subsection{Report writing}
+
+\begin{itemize}
+    \item Yusuf wrote Section 2 (initialization procedure) and the explanation of Tasks 1, 3 in Section 3.
+    \item Ibrahim contributed Section 1 (system architecture) and wrote the report sections for Tasks 5 and 6.
+    \item Vu contributed to Section 1, wrote report entries for Tasks 4, 7, and 8, and finalized the structure and formatting of the report.
+\end{itemize}
+
+\subsection{Supporting tools}
+
+\begin{itemize}
+    \item Our group used GitHub as version control and collaboration platform. Code and documentation were regularly reviewed through commits, pull requests, and discussions to ensure consistency and quality.
+    \item For writing the LaTeX report, the group used Overleaf to collaborate in real time and organize sections efficiently.
+\end{itemize}
+
+\end{document}
