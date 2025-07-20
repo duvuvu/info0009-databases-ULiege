@@ -18,4 +18,4 @@ Grade: 17.3/20
 
 This project focuses on building a relational database system to manage public transportation data (project part 1) such as agencies, stops, services, routes, and schedules. The system is implemented using MySQL and PHP, with a frontend for data manipulation and querying. Docker is used for deployment, and PhpMyAdmin provides database access. The project includes tasks for data loading, selection, insertion, deletion, updates, and view creation, with an emphasis on data integrity, transaction management, and collaborative development.
 
-Grade: IN PROCESS
+Grade: 17/20
