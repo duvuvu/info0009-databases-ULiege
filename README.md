@@ -1,4 +1,4 @@
-# INFO0009 Bases des donnes (Databases)
+# INFO0009 Bases des donnees (Databases)
 
 ## Authors
 This projects were carried by:
